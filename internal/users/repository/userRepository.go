@@ -50,3 +50,25 @@ func (r *UserRepository) DeleteUser(userID int) error {
 	_, err := r.db.Exec(query, userID)
 	return err
 }
+
+func (r *UserRepository) GetUserByUsername(username string) (model.User, error) {
+	query := fmt.Sprintf("SELECT id, username, email, password FROM %v WHERE username= $1", Users)
+	var user model.User
+	err := r.db.Get(&user, query, username)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+
+func (r *UserRepository) GetUserByEmail(email string) (model.User, error) {
+	query := fmt.Sprintf("SELECT id, username, email, password FROM %v WHERE email= $1", Users)
+	var user model.User
+	err := r.db.Get(&user, query, email)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
+}
