@@ -3,6 +3,7 @@ package middleware
 import (
 	"e-commerce/internal/users/model"
 	"e-commerce/internal/users/repository"
+	"e-commerce/internal/users/service"
 	"net/http"
 
 	handler "e-commerce/pkg/response"
@@ -11,11 +12,15 @@ import (
 )
 
 type UserMiddleware struct {
-	repo *repository.UserRepository
+	repo    *repository.UserRepository
+	service *service.UserService
 }
 
-func NewUserMiddleware(repo *repository.UserRepository) *UserMiddleware {
-	return &UserMiddleware{repo: repo}
+func NewUserMiddleware(repo *repository.UserRepository, service *service.UserService) *UserMiddleware {
+	return &UserMiddleware{
+		repo:    repo,
+		service: service,
+	}
 }
 
 func (m *UserMiddleware) CheckUserExists() gin.HandlerFunc {
@@ -62,7 +67,7 @@ func (m *UserMiddleware) CheckUserExists() gin.HandlerFunc {
 		}
 
 		// Create the user since it doesn't exist
-		if _, err := m.repo.CreateUser(&input); err != nil {
+		if _, err := m.service.CreateUser(&input); err != nil {
 			handler.NewErrorResponse(c, http.StatusInternalServerError, "Could not create user")
 			return
 		}

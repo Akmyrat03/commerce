@@ -14,7 +14,7 @@ func InitUserRoutes(router *gin.RouterGroup, DB *sqlx.DB) {
 	userRepo := repository.NewUserRepository(DB)
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserService(userService)
-	userMiddleware := middleware.NewUserMiddleware(userRepo)
+	userMiddleware := middleware.NewUserMiddleware(userRepo, userService)
 
 	userRoutes := router.Group("/users")
 	// userRoutes.POST("/sign-up", userHandler.SignUp)

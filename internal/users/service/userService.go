@@ -31,11 +31,40 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 	}
 }
 
+// Create a user
 func (s *UserService) CreateUser(user *model.User) (int, error) {
 	user.Password = GeneratePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
 
+// Get user by username and password
+func (s *UserService) GetUser(username, password string) (model.User, error) {
+	return s.repo.GetUser(username, password)
+}
+
+// Sign out
+func (s *UserService) SignOut(username, password string) error {
+	user, err := s.repo.GetUser(username, GeneratePasswordHash(password))
+	if err != nil {
+		return err
+	}
+
+	return s.repo.DeleteUser(user.ID)
+}
+
+// Generate password
+func GeneratePasswordHash(password string) string {
+	// SHA-1 algoritmasi kullanmak icin yeni bir hash nesnesi olusturur
+	hash := sha1.New()
+
+	// Parolayi byte'lara donusturup hash nesnesine yazdirir
+	hash.Write([]byte(password))
+
+	// salt degerini ekleyip hash'in son halini alir ve stringe cevirir
+	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
+}
+
+// Generate token
 func (s *UserService) GenerateToken(username, password string) (string, error) {
 	user, err := s.repo.GetUser(username, GeneratePasswordHash(password))
 	if err != nil {
@@ -51,28 +80,4 @@ func (s *UserService) GenerateToken(username, password string) (string, error) {
 	})
 
 	return token.SignedString(signingKey)
-}
-
-func (s *UserService) GetUser(username, password string) (model.User, error) {
-	return s.repo.GetUser(username, password)
-}
-
-func (s *UserService) SignOut(username, password string) error {
-	user, err := s.repo.GetUser(username, GeneratePasswordHash(password))
-	if err != nil {
-		return err
-	}
-
-	return s.repo.DeleteUser(user.ID)
-}
-
-func GeneratePasswordHash(password string) string {
-	// SHA-1 algoritmasi kullanmak icin yeni bir hash nesnesi olusturur
-	hash := sha1.New()
-
-	// Parolayi byte'lara donusturup hash nesnesine yazdirir
-	hash.Write([]byte(password))
-
-	// salt degerini ekleyip hash'in son halini alir ve stringe cevirir
-	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }

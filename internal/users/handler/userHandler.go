@@ -19,34 +19,34 @@ func NewUserService(service *service.UserService) *UserHandler {
 	}
 }
 
-func (h *UserHandler) SignUp(c *gin.Context) {
-	var input model.User
-	if err := c.BindJSON(&input); err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
+// func (h *UserHandler) SignUp(c *gin.Context) {
+// 	var input model.User
+// 	if err := c.BindJSON(&input); err != nil {
+// 		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+// 		return
+// 	}
 
-	if input.Username == "" || input.Email == "" || input.Password == "" {
-		handler.NewErrorResponse(c, http.StatusBadRequest, "All fields are required")
-		return
-	}
+// 	if input.Username == "" || input.Email == "" || input.Password == "" {
+// 		handler.NewErrorResponse(c, http.StatusBadRequest, "All fields are required")
+// 		return
+// 	}
 
-	if len(input.Password) < 4 {
-		handler.NewErrorResponse(c, http.StatusBadRequest, "Password must be at least 4 characters")
-		return
-	}
+// 	if len(input.Password) < 4 {
+// 		handler.NewErrorResponse(c, http.StatusBadRequest, "Password must be at least 4 characters")
+// 		return
+// 	}
 
-	_, err := h.service.CreateUser(&input)
-	if err != nil {
-		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
+// 	_, err := h.service.CreateUser(&input)
+// 	if err != nil {
+// 		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"username": input.Username,
-		"password": input.Password,
-	})
-}
+// 	c.JSON(http.StatusOK, map[string]interface{}{
+// 		"username": input.Username,
+// 		"password": input.Password,
+// 	})
+// }
 
 func (h *UserHandler) Login(c *gin.Context) {
 	var input model.User
