@@ -31,6 +31,11 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 		return
 	}
 
+	if len(input.Password) < 4 {
+		handler.NewErrorResponse(c, http.StatusBadRequest, "Password must be at least 4 characters")
+		return
+	}
+
 	_, err := h.service.CreateUser(&input)
 	if err != nil {
 		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -53,6 +58,11 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	if input.Username == "" || input.Password == "" {
 		handler.NewErrorResponse(c, http.StatusBadRequest, "All fields are required")
+		return
+	}
+
+	if len(input.Password) < 4 {
+		handler.NewErrorResponse(c, http.StatusBadRequest, "Password must be at least 4 characters")
 		return
 	}
 
