@@ -52,5 +52,3 @@
 --     product_id INT REFERENCES products(id),
 --     quantity INT NOT NULL
 -- );
-
-

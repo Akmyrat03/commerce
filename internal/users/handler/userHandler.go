@@ -19,6 +19,68 @@ func NewUserService(service *service.UserService) *UserHandler {
 	}
 }
 
+// func (h *UserHandler) Login(c *gin.Context) {
+// 	var input model.User
+
+// 	if err := c.BindJSON(&input); err != nil {
+// 		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+// 		return
+// 	}
+
+// 	if input.Username == "" || input.Password == "" {
+// 		handler.NewErrorResponse(c, http.StatusBadRequest, "All fields are required")
+// 		return
+// 	}
+
+// 	token, err := h.service.GenerateToken(input.Username, input.Password)
+// 	if err != nil {
+// 		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+// 		return
+// 	}
+
+// 	user, err := h.service.GetUser(input.Username, service.GeneratePasswordHash(input.Password))
+// 	if err != nil {
+// 		handler.NewErrorResponse(c, http.StatusUnauthorized, "username or password is incorrect")
+// 		return
+// 	}
+
+// 	if user.Role == "admin" {
+// 		c.JSON(http.StatusOK, map[string]interface{}{
+// 			"token":    token,
+// 			"redirect": "/admin/dashboard",
+// 		})
+// 	} else {
+// 		c.JSON(http.StatusOK, map[string]interface{}{
+// 			"token":    token,
+// 			"redirect": "/user/profile",
+// 		})
+// 	}
+
+// }
+
+func (h *UserHandler) SignOut(c *gin.Context) {
+	var input model.User
+	if err := c.BindJSON(&input); err != nil {
+		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if input.Username == "" || input.Password == "" {
+		handler.NewErrorResponse(c, http.StatusBadRequest, "All fields are required")
+		return
+	}
+
+	err := h.service.SignOut(input.Username, input.Password)
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusUnauthorized, "username or password is incorrect")
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Accounted deleted successfully",
+	})
+}
+
 // func (h *UserHandler) SignUp(c *gin.Context) {
 // 	var input model.User
 // 	if err := c.BindJSON(&input); err != nil {
@@ -47,70 +109,3 @@ func NewUserService(service *service.UserService) *UserHandler {
 // 		"password": input.Password,
 // 	})
 // }
-
-func (h *UserHandler) Login(c *gin.Context) {
-	var input model.User
-
-	if err := c.BindJSON(&input); err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if input.Username == "" || input.Password == "" {
-		handler.NewErrorResponse(c, http.StatusBadRequest, "All fields are required")
-		return
-	}
-
-	if len(input.Password) < 4 {
-		handler.NewErrorResponse(c, http.StatusBadRequest, "Password must be at least 4 characters")
-		return
-	}
-
-	token, err := h.service.GenerateToken(input.Username, input.Password)
-	if err != nil {
-		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	user, err := h.service.GetUser(input.Username, service.GeneratePasswordHash(input.Password))
-	if err != nil {
-		handler.NewErrorResponse(c, http.StatusUnauthorized, "username or password is incorrect")
-		return
-	}
-
-	if user.Role == "admin" {
-		c.JSON(http.StatusOK, map[string]interface{}{
-			"token":    token,
-			"redirect": "/admin/dashboard",
-		})
-	} else {
-		c.JSON(http.StatusOK, map[string]interface{}{
-			"token":    token,
-			"redirect": "/user/profile",
-		})
-	}
-
-}
-
-func (h *UserHandler) SignOut(c *gin.Context) {
-	var input model.User
-	if err := c.BindJSON(&input); err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if input.Username == "" || input.Password == "" {
-		handler.NewErrorResponse(c, http.StatusBadRequest, "All fields are required")
-		return
-	}
-
-	err := h.service.SignOut(input.Username, input.Password)
-	if err != nil {
-		handler.NewErrorResponse(c, http.StatusUnauthorized, "username or password is incorrect")
-		return
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Accounted deleted successfully",
-	})
-}
