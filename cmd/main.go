@@ -1,18 +1,22 @@
 package main
 
 import (
+	"context"
 	userRoutes "e-commerce/internal/users/routes"
 	"e-commerce/pkg/database"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func main() {
+
 	logrus.SetFormatter(new(logrus.JSONFormatter))
+
 	if err := InitConfig(); err != nil {
 		log.Fatalf("error initializing configs: %s", err.Error())
 	}
@@ -30,11 +34,23 @@ func main() {
 		log.Fatalf("failed to initialize DB: %v", err.Error())
 	}
 
+	redisAddr := viper.GetString("REDIS.addr")
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: redisAddr,
+	})
+
+	ctx := context.Background()
+	_, err = redisClient.Ping(ctx).Result()
+	if err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+
 	app := gin.Default()
 	api := app.Group("/api")
-	userRoutes.InitUserRoutes(api, DB)
 
-	if err := app.Run("localhost:8000"); err != nil {
+	userRoutes.InitUserRoutes(api, DB, redisClient)
+
+	if err := app.Run(viper.GetString("APP.host")); err != nil {
 		log.Fatalf("Failed running app: %v", err)
 	}
 }
@@ -42,5 +58,11 @@ func main() {
 func InitConfig() error {
 	viper.AddConfigPath("config")
 	viper.SetConfigName("config")
-	return viper.ReadInConfig()
+	if err := viper.ReadInConfig(); err != nil {
+		return err
+	}
+
+	viper.SetDefault("REDIS.addr", "localhost:6379")
+	viper.SetDefault("APP.host", "localhost:8000")
+	return nil
 }

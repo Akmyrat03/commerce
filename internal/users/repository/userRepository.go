@@ -45,30 +45,23 @@ func (r *UserRepository) GetUser(username, password string) (model.User, error) 
 	return user, nil
 }
 
+func (r *UserRepository) GetUserByField(field, value string) (model.User, error) {
+	if field != "username" && field != "email" {
+		return model.User{}, fmt.Errorf("unsupported field: %s", field)
+	}
+
+	query := fmt.Sprintf("SELECT id, username, email, password FROM %v WHERE %s= $1", Users, field)
+	var user model.User
+	err := r.db.Get(&user, query, value)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
+}
+
 func (r *UserRepository) DeleteUser(userID int) error {
 	query := fmt.Sprintf(`DELETE FROM %v WHERE id= $1`, Users)
 	_, err := r.db.Exec(query, userID)
 	return err
-}
-
-func (r *UserRepository) GetUserByUsername(username string) (model.User, error) {
-	query := fmt.Sprintf("SELECT id, username, email, password FROM %v WHERE username= $1", Users)
-	var user model.User
-	err := r.db.Get(&user, query, username)
-	if err != nil {
-		return model.User{}, err
-	}
-
-	return user, nil
-}
-
-func (r *UserRepository) GetUserByEmail(email string) (model.User, error) {
-	query := fmt.Sprintf("SELECT id, username, email, password FROM %v WHERE email= $1", Users)
-	var user model.User
-	err := r.db.Get(&user, query, email)
-	if err != nil {
-		return model.User{}, err
-	}
-
-	return user, nil
 }

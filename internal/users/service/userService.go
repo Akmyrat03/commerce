@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"e-commerce/internal/users/model"
 	"e-commerce/internal/users/repository"
+	"errors"
 	"fmt"
 	"time"
 
@@ -22,7 +23,8 @@ type UserService struct {
 type tokenClaims struct {
 	jwt.StandardClaims
 
-	User_id int `json:"user_id"`
+	User_id  int    `json:"user_id"`
+	Username string `json:"username"`
 }
 
 func NewUserService(repo *repository.UserRepository) *UserService {
@@ -73,11 +75,31 @@ func (s *UserService) GenerateToken(username, password string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
+			ExpiresAt: time.Now().Add(7 * 24 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
 		user.ID,
+		user.Username,
 	})
 
 	return token.SignedString(signingKey)
+}
+
+// Validate token
+func (s *UserService) ValidateToken(tokenString string) (string, error) {
+	claims := &tokenClaims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return signingKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		return "", errors.New("invalid token")
+	}
+
+	return claims.Username, nil
 }

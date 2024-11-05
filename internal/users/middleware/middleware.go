@@ -1,25 +1,31 @@
 package middleware
 
 import (
+	"context"
 	"e-commerce/internal/users/model"
 	"e-commerce/internal/users/repository"
 	"e-commerce/internal/users/service"
 	"net/http"
+	"strings"
+	"time"
 
 	handler "e-commerce/pkg/response"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
 type UserMiddleware struct {
 	repo    *repository.UserRepository
 	service *service.UserService
+	redis   *redis.Client
 }
 
-func NewUserMiddleware(repo *repository.UserRepository, service *service.UserService) *UserMiddleware {
+func NewUserMiddleware(repo *repository.UserRepository, service *service.UserService, redis *redis.Client) *UserMiddleware {
 	return &UserMiddleware{
 		repo:    repo,
 		service: service,
+		redis:   redis,
 	}
 }
 
@@ -47,7 +53,7 @@ func (m *UserMiddleware) SignUp() gin.HandlerFunc {
 		}
 
 		// Check for existing user by username
-		existingUser, err := m.repo.GetUserByUsername(input.Username)
+		existingUser, err := m.repo.GetUserByField("username", input.Username)
 		if err == nil && existingUser.Username != "" {
 			c.JSON(http.StatusConflict, gin.H{
 				"error": "Username already exists",
@@ -57,7 +63,7 @@ func (m *UserMiddleware) SignUp() gin.HandlerFunc {
 		}
 
 		// Check for existing user by email
-		existingEmailUser, err := m.repo.GetUserByEmail(input.Email)
+		existingEmailUser, err := m.repo.GetUserByField("email", input.Email)
 		if err == nil && existingEmailUser.Email != "" {
 			c.JSON(http.StatusConflict, gin.H{
 				"error": "Email already exists",
@@ -145,9 +151,68 @@ func (m *UserMiddleware) SignOut() gin.HandlerFunc {
 			return
 		}
 
+		token := c.Request.Header.Get("Authorization")
+		if token != "" {
+			ctx := context.Background()
+			m.redis.Set(ctx, "blacklist:"+token, "true", time.Hour*24)
+		}
+
 		c.JSON(http.StatusOK, map[string]interface{}{
 			"message": "Accounted deleted successfully",
 		})
 
+	}
+}
+
+func (m *UserMiddleware) Authenticate() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.Request.Header.Get("Authorization")
+		if token == "" {
+			handler.NewErrorResponse(c, http.StatusUnauthorized, "Token gereklidir")
+			c.Abort()
+			return
+		}
+
+		ctx := context.Background()
+
+		blacklisted, err := m.redis.Get(ctx, "blacklist:"+token).Result()
+		if err == nil && blacklisted == "true" {
+			handler.NewErrorResponse(c, http.StatusUnauthorized, "Token gecersiz")
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func (m *UserMiddleware) Profile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.Request.Header.Get("Authorization")
+		if token == "" {
+			handler.NewErrorResponse(c, http.StatusUnauthorized, "Token gereklidir")
+			c.Abort()
+			return
+		}
+
+		token = strings.TrimPrefix(token, "Bearer ")
+
+		username, err := m.service.ValidateToken(token)
+		if err != nil {
+			handler.NewErrorResponse(c, http.StatusUnauthorized, "Geçersiz token")
+			c.Abort()
+			return
+		}
+
+		user, err := m.repo.GetUserByField("username", username)
+		if err != nil {
+			handler.NewErrorResponse(c, http.StatusNotFound, "Kullanıcı bulunamadı")
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"username": user.Username,
+			"email":    user.Email,
+		})
 	}
 }
