@@ -1,0 +1,13 @@
+# Ignore executable files
+*.exe
+*.out
+*.log
+
+# Ignore OS or editor-specific files
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Ignore vendor folder (for dependencies)
+vendor/
