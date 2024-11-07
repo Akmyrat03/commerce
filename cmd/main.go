@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	categoryRoutes "e-commerce/internal/categories/routes"
 	userRoutes "e-commerce/internal/users/routes"
 	"e-commerce/pkg/database"
 	"log"
@@ -49,6 +50,7 @@ func main() {
 	api := app.Group("/api")
 
 	userRoutes.InitUserRoutes(api, DB, redisClient)
+	categoryRoutes.InitCategoryRoutes(api, DB)
 
 	if err := app.Run(viper.GetString("APP.host")); err != nil {
 		log.Fatalf("Failed running app: %v", err)
