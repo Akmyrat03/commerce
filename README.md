@@ -8,3 +8,5 @@ And token generated for user.
 "http://localhost:8000/api/users/sign-out“
 4) User can view profile when signed in
 "http://localhost:8000/api/users/profile
+
+
