@@ -20,44 +20,6 @@ func NewProductHandler(service *service.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
-// func (h *ProductHandler) CreateProduct(c *gin.Context) {
-// 	var product model.Product
-// 	if err := c.BindJSON(&product); err != nil {
-// 		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-// 		return
-// 	}
-
-// 	file, err := c.FormFile("file")
-// 	if err != nil {
-// 		handler.NewErrorResponse(c, http.StatusBadGateway, err.Error())
-// 		return
-// 	}
-
-// 	uploadDir := "/uploads"
-
-// 	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-// 		os.Mkdir(uploadDir, 0755)
-// 	}
-
-// 	filePath := filepath.Join(uploadDir, file.Filename)
-
-// 	if err := c.SaveUploadedFile(file, filePath); err != nil {
-// 		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed too upload file")
-// 		return
-// 	}
-
-// 	product.Image = filePath
-
-// 	if err := h.service.AddProduct(product); err != nil {
-// 		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to create product")
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusCreated, gin.H{
-// 		"message": "Product created successfully",
-// 	})
-// }
-
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	name := c.PostForm("name")
 	description := c.PostForm("description")
