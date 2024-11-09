@@ -16,3 +16,11 @@ func NewProductService(repo *repository.ProductRepository) *ProductService {
 func (s *ProductService) AddProduct(product model.Product) error {
 	return s.repo.CreateProduct(product)
 }
+
+func (s *ProductService) DeleteProduct(id int) error {
+	return s.repo.Delete(id)
+}
+
+func (s *ProductService) GetAll() ([]model.Product, error) {
+	return s.repo.GetAll()
+}

@@ -25,7 +25,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	description := c.PostForm("description")
 
 	priceInput := c.PostForm("price")
-	price, err := strconv.Atoi(priceInput)
+	price, err := strconv.ParseFloat(priceInput, 64)
 	if err != nil {
 		handler.NewErrorResponse(c, http.StatusBadRequest, "Invalid price format")
 		return
@@ -72,5 +72,35 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Product created successfully",
+	})
+}
+
+func (h *ProductHandler) DeleteProduct(c *gin.Context) {
+	idInput := c.Param("id")
+	id, err := strconv.Atoi(idInput)
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.service.DeleteProduct(id); err != nil {
+		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete product")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Product deleted successfully",
+	})
+}
+
+func (h *ProductHandler) GetAllProducts(c *gin.Context) {
+	products, err := h.service.GetAll()
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"products": products,
 	})
 }

@@ -28,3 +28,24 @@ func (r *ProductRepository) CreateProduct(product model.Product) error {
 
 	return nil
 }
+
+func (r *ProductRepository) Delete(id int) error {
+	query := fmt.Sprintf("DELETE FROM %v WHERE id = $1", Products)
+	_, err := r.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ProductRepository) GetAll() ([]model.Product, error) {
+	var products []model.Product
+	query := fmt.Sprintf("SELECT id, name, description, price, image, category_id FROM %v", Products)
+	err := r.db.Select(&products, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
