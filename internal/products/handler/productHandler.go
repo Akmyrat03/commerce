@@ -104,3 +104,17 @@ func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 		"products": products,
 	})
 }
+
+func (h *ProductHandler) GetProductByCategoryName(c *gin.Context) {
+	categoryName := c.Param("name")
+
+	products, err := h.service.GetProductByCatName(categoryName)
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to fetch products")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"products": products,
+	})
+}

@@ -41,8 +41,22 @@ func (r *ProductRepository) Delete(id int) error {
 
 func (r *ProductRepository) GetAll() ([]model.Product, error) {
 	var products []model.Product
-	query := fmt.Sprintf("SELECT id, name, description, price, image, category_id FROM %v", Products)
+	query := `SELECT p.id, p.name, p.description, p.price, p.image, c.name AS category_name FROM products AS p 
+	INNER JOIN categories AS c ON c.id= p.category_id`
 	err := r.db.Select(&products, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+func (r *ProductRepository) GetProductByCategory(categoryName string) ([]model.Product, error) {
+	var products []model.Product
+	query := `SELECT p.id, p.name, p.description, p.price, p.image, c.name AS category_name FROM products AS p 
+	INNER JOIN categories AS c ON c.id=p.category_id 
+	WHERE c.name=$1`
+	err := r.db.Select(&products, query, categoryName)
 	if err != nil {
 		return nil, err
 	}

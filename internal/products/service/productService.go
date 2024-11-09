@@ -24,3 +24,7 @@ func (s *ProductService) DeleteProduct(id int) error {
 func (s *ProductService) GetAll() ([]model.Product, error) {
 	return s.repo.GetAll()
 }
+
+func (s *ProductService) GetProductByCatName(category string) ([]model.Product, error) {
+	return s.repo.GetProductByCategory(category)
+}
