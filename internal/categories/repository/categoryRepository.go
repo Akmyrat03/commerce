@@ -50,3 +50,13 @@ func (r *CategoryRepository) Update(id int, name string) error {
 
 	return nil
 }
+
+func (r *CategoryRepository) GetAll() ([]model.Category, error) {
+	var categories []model.Category
+	query := fmt.Sprintf("SELECT id, name, created_at FROM %v", Category)
+	err := r.db.Select(&categories, query)
+	if err != nil {
+		return nil, err
+	}
+	return categories, nil
+}

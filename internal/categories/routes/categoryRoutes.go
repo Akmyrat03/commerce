@@ -19,4 +19,5 @@ func InitCategoryRoutes(router *gin.RouterGroup, db *sqlx.DB) {
 	categoryRoutes.POST("/add", categoryHandler.CreateCategory)
 	categoryRoutes.DELETE("/delete/:id", categoryHandler.DeleteCategoryByID)
 	categoryRoutes.PUT("/update/:id", categoryHandler.UpdateCategoryByID)
+	categoryRoutes.GET("/view", categoryHandler.GetAllCategories)
 }

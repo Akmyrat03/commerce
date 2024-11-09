@@ -216,3 +216,17 @@ func (m *UserMiddleware) Profile() gin.HandlerFunc {
 		})
 	}
 }
+
+func (m *UserMiddleware) GetAllUsers() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		users, err := m.service.GetAll()
+		if err != nil {
+			handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"users": users,
+		})
+	}
+}

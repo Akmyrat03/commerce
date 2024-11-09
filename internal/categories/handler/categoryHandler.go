@@ -21,7 +21,7 @@ func NewCategoryHandler(service *service.CategoryService) *CategoryHandler {
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	var input model.Category
 	if err := c.BindJSON(&input); err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		handler.NewErrorResponse(c, http.StatusBadRequest, "Category name is required")
 		return
 	}
 
@@ -65,7 +65,12 @@ func (h *CategoryHandler) UpdateCategoryByID(c *gin.Context) {
 
 	var input model.Category
 	if err := c.BindJSON(&input); err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		handler.NewErrorResponse(c, http.StatusBadRequest, "Category name is required")
+		return
+	}
+
+	if input.Name == "" {
+		handler.NewErrorResponse(c, http.StatusBadRequest, "Category name is required")
 		return
 	}
 
@@ -77,5 +82,17 @@ func (h *CategoryHandler) UpdateCategoryByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Category successfully updated",
+	})
+}
+
+func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
+	categories, err := h.service.Get()
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"categories": categories,
 	})
 }

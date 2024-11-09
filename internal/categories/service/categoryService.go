@@ -24,3 +24,7 @@ func (s *CategoryService) Delete(id int) error {
 func (s *CategoryService) Update(id int, name string) error {
 	return s.repo.Update(id, name)
 }
+
+func (s *CategoryService) Get() ([]model.Category, error) {
+	return s.repo.GetAll()
+}

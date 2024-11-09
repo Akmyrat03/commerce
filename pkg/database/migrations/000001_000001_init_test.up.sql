@@ -14,14 +14,14 @@ CREATE TABLE IF NOT EXISTS categories (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- CREATE TABLE IF NOT EXISTS products (
---     id SERIAL PRIMARY KEY,
---     name VARCHAR(100),
---     description TEXT,
---     price DECIMAL(10, 2) NOT NULL,
---     stock INT DEFAULT 0,
---     category_id INT REFERENCES categories(id)
--- );
+CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    description TEXT,
+    image VARCHAR(255),
+    price DECIMAL(10, 2) NOT NULL,
+    category_id INT REFERENCES categories(id) ON DELETE CASCADE
+);
 
 -- CREATE TABLE IF NOT EXISTS orders (
 --     id SERIAL PRIMARY KEY,

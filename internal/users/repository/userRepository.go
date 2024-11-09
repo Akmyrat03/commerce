@@ -65,3 +65,14 @@ func (r *UserRepository) DeleteUser(userID int) error {
 	_, err := r.db.Exec(query, userID)
 	return err
 }
+
+func (r *UserRepository) GetAll() ([]model.User, error) {
+	query := fmt.Sprintf("SELECT id, username, email, password, role, created_at FROM %v", Users)
+	var users []model.User
+	err := r.db.Select(&users, query)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

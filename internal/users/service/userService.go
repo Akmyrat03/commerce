@@ -44,6 +44,11 @@ func (s *UserService) GetUser(username, password string) (model.User, error) {
 	return s.repo.GetUser(username, password)
 }
 
+// Get all users
+func (s *UserService) GetAll() ([]model.User, error) {
+	return s.repo.GetAll()
+}
+
 // Sign out
 func (s *UserService) SignOut(username, password string) error {
 	user, err := s.repo.GetUser(username, GeneratePasswordHash(password))

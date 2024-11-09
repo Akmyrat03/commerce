@@ -21,5 +21,6 @@ func InitUserRoutes(router *gin.RouterGroup, DB *sqlx.DB, redisClient *redis.Cli
 	userRoutes.POST("/login", userMiddleware.Login())
 	userRoutes.DELETE("/sign-out", userMiddleware.SignOut())
 	userRoutes.GET("/profile", userMiddleware.Authenticate(), userMiddleware.Profile())
+	userRoutes.GET("/view-users", userMiddleware.GetAllUsers())
 
 }
