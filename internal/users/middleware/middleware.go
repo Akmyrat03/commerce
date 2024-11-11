@@ -34,7 +34,7 @@ func (m *UserMiddleware) SignUp() gin.HandlerFunc {
 		var input model.User
 		if err := c.BindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid input format",
+				"error": err.Error(),
 			})
 			c.Abort()
 			return
@@ -92,7 +92,7 @@ func (m *UserMiddleware) Login() gin.HandlerFunc {
 		var input model.User
 		if err := c.BindJSON(&input); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid input format",
+				"error": err.Error(),
 			})
 			c.Abort()
 			return

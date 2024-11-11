@@ -19,5 +19,6 @@ func InitRoutes(db *sqlx.DB, router *gin.RouterGroup) {
 	prodRoutes.POST("/add-product", prodHandler.CreateProduct)
 	prodRoutes.DELETE("/delete/:id", prodHandler.DeleteProduct)
 	prodRoutes.GET("/view-all", prodHandler.GetAllProducts)
+	prodRoutes.GET("/published", prodHandler.GetAllPublishedProducts)
 	prodRoutes.GET("/view/:name", prodHandler.GetProductByCategoryName)
 }

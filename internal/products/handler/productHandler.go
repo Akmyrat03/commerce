@@ -4,6 +4,7 @@ import (
 	"e-commerce/internal/products/model"
 	"e-commerce/internal/products/service"
 	handler "e-commerce/pkg/response"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -31,12 +32,14 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	catIDInput := c.PostForm("category_id")
-	category_id, err := strconv.Atoi(catIDInput)
+	categoryID := c.PostForm("category_id")
+	category_id, err := strconv.Atoi(categoryID)
 	if err != nil {
 		handler.NewErrorResponse(c, http.StatusBadRequest, "Invalid category_id format")
 		return
 	}
+
+	status := c.PostForm("status")
 
 	file, err := c.FormFile("image")
 	if err != nil {
@@ -44,7 +47,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	uploadDir := "./uploads"
+	uploadDir := "./uploads/products"
 
 	if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
 		os.Mkdir(uploadDir, 0755)
@@ -63,10 +66,11 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		Price:       price,
 		CategoryID:  category_id,
 		Image:       filePath,
+		Status:      status,
 	}
 
 	if err := h.service.AddProduct(product); err != nil {
-		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to create product")
+		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -83,9 +87,24 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 		return
 	}
 
+	existingProduct, err := h.service.GetProductByID(id)
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	fmt.Println("Image path before deletion:", existingProduct.Image)
+
 	if err := h.service.DeleteProduct(id); err != nil {
 		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete product")
 		return
+	}
+
+	if existingProduct.Image != "" {
+		if err := os.Remove(existingProduct.Image); err != nil && !os.IsNotExist(err) {
+			handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete image file")
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -95,6 +114,18 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 
 func (h *ProductHandler) GetAllProducts(c *gin.Context) {
 	products, err := h.service.GetAll()
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"products": products,
+	})
+}
+
+func (h *ProductHandler) GetAllPublishedProducts(c *gin.Context) {
+	products, err := h.service.GetAllPublishedProducts()
 	if err != nil {
 		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

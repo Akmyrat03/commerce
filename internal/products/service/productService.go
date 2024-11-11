@@ -25,6 +25,14 @@ func (s *ProductService) GetAll() ([]model.Product, error) {
 	return s.repo.GetAll()
 }
 
+func (s *ProductService) GetAllPublishedProducts() ([]model.Product, error) {
+	return s.repo.GetAllPublishedProducts()
+}
+
 func (s *ProductService) GetProductByCatName(category string) ([]model.Product, error) {
 	return s.repo.GetProductByCategory(category)
+}
+
+func (s *ProductService) GetProductByID(id int) (model.Product, error) {
+	return s.repo.GetProductByID(id)
 }

@@ -16,8 +16,23 @@ And token generated for user.
 1) Admin can create a category. Category name field must not be empty.
 http://localhost:8000/api/categories/add
 2) Admin can update category by id. Category name field is required.
-http://localhost:8000/api/categories/update/3
+http://localhost:8000/api/categories/update/id
 3) Admin can delete category by id.
-http://localhost:8000/api/categories/delete/2
+http://localhost:8000/api/categories/delete/id
 4) View all categories.
 http://localhost:8000/api/categories/view
+
+
+--------------------------------------------------------------------------------------
+1) Admin can create products
+http://localhost:8000/api/products/add-product
+2) Admin see all drafted and published status products
+http://localhost:8000/api/products/view-all
+3) Users can see just published status products
+http://localhosy:8000/api/products/published
+4) We can group products by category name
+http://localhost:8000/api/products/view/name
+5) Admin can delete products by id
+http://localhost:8000/api/products/delete/id
+6) Admin can update products by id
+http://localhost:8000/api/products/update/id

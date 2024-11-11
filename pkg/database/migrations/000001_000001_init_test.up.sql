@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    image VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -20,7 +20,9 @@ CREATE TABLE IF NOT EXISTS products (
     description TEXT,
     image VARCHAR(255),
     price DECIMAL(10, 2) NOT NULL,
-    category_id INT REFERENCES categories(id) ON DELETE CASCADE
+    category_id INT REFERENCES categories(id) ON DELETE CASCADE,
+    status VARCHAR(50) DEFAULT 'draft',
+    created_at TIMESTAMP DEFAULT Now()
 );
 
 -- CREATE TABLE IF NOT EXISTS orders (

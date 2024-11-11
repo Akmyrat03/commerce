@@ -21,10 +21,14 @@ func (s *CategoryService) Delete(id int) error {
 	return s.repo.Delete(id)
 }
 
-func (s *CategoryService) Update(id int, name string) error {
-	return s.repo.Update(id, name)
+func (s *CategoryService) Update(id int, name, image string) error {
+	return s.repo.Update(id, name, image)
 }
 
 func (s *CategoryService) Get() ([]model.Category, error) {
 	return s.repo.GetAll()
+}
+
+func (s *CategoryService) GetCategoryByID(id int) (model.Category, error) {
+	return s.repo.GetCategoryByID(id)
 }
