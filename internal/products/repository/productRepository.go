@@ -21,8 +21,8 @@ func NewProductRepository(db *sqlx.DB) *ProductRepository {
 
 // Admin can create a new product
 func (r *ProductRepository) CreateProduct(product model.Product) error {
-	query := fmt.Sprintf("INSERT INTO %s (name, description, image, price, category_id, status) VALUES ($1, $2, $3, $4, $5, $6)", Products)
-	_, err := r.db.Exec(query, product.Name, product.Description, product.Image, product.Price, product.CategoryID, product.Status)
+	query := fmt.Sprintf("INSERT INTO %s (name, description, image, price, status, category_id) VALUES ($1, $2, $3, $4, $5, $6)", Products)
+	_, err := r.db.Exec(query, product.Name, product.Description, product.Image, product.Price, product.Status, product.CategoryID)
 	if err != nil {
 		return err
 	}

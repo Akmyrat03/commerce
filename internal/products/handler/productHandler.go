@@ -32,11 +32,10 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	categoryID := c.PostForm("category_id")
-	category_id, err := strconv.Atoi(categoryID)
+	catIdInput := c.PostForm("category_id")
+	catID, err := strconv.Atoi(catIdInput)
 	if err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, "Invalid category_id format")
-		return
+		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 
 	status := c.PostForm("status")
@@ -64,9 +63,9 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		Name:        name,
 		Description: description,
 		Price:       price,
-		CategoryID:  category_id,
 		Image:       filePath,
 		Status:      status,
+		CategoryID:  catID,
 	}
 
 	if err := h.service.AddProduct(product); err != nil {
