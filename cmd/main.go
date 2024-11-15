@@ -5,6 +5,7 @@ import (
 	cartRoutes "e-commerce/internal/cart/routes"
 	cartItemRoutes "e-commerce/internal/cart_items/routes"
 	categoryRoutes "e-commerce/internal/categories/routes"
+	orderRoutes "e-commerce/internal/orders/routes"
 	prodRoutes "e-commerce/internal/products/routes"
 	userRoutes "e-commerce/internal/users/routes"
 	"e-commerce/pkg/database"
@@ -57,6 +58,7 @@ func main() {
 	prodRoutes.InitRoutes(DB, api)
 	cartRoutes.InitCartRoutes(DB, api)
 	cartItemRoutes.InitCartRoutes(DB, api)
+	orderRoutes.InitOrderRoutes(DB, api)
 
 	if err := app.Run(viper.GetString("APP.host")); err != nil {
 		log.Fatalf("Failed running app: %v", err)

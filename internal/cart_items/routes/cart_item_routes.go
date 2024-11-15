@@ -17,4 +17,5 @@ func InitCartRoutes(db *sqlx.DB, router *gin.RouterGroup) {
 	cartItemRoutes := router.Group("item")
 
 	cartItemRoutes.POST("/add-cart-item", cartItemHand.CreateCartItem)
+	cartItemRoutes.GET("/get-all/:id", cartItemHand.GetAllCartItems)
 }

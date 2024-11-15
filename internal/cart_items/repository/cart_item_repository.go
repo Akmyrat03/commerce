@@ -30,3 +30,26 @@ func (r *CartItemRepository) Create(item model.CartItem) (model.CartItem, error)
 	return item, nil
 
 }
+
+func (r *CartItemRepository) GetAll(id int) ([]model.CartItem, error) {
+	query := fmt.Sprintf("SELECT id, cart_id, product_id, quantity FROM %s WHERE cart_id = $1", cartItem)
+	rows, err := r.db.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := []model.CartItem{}
+
+	for rows.Next() {
+		var item model.CartItem
+		if err := rows.Scan(&item.ID, &item.CartID, &item.ProductID, &item.Quantity); err != nil {
+			return nil, err
+		}
+
+		items = append(items, item)
+
+	}
+
+	return items, nil
+}

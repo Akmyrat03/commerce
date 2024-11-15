@@ -16,3 +16,7 @@ func NewCartItemService(repo *repository.CartItemRepository) *CartItemService {
 func (service *CartItemService) Create(item model.CartItem) (model.CartItem, error) {
 	return service.repo.Create(item)
 }
+
+func (service *CartItemService) GetAll(id int) ([]model.CartItem, error) {
+	return service.repo.GetAll(id)
+}

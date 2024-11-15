@@ -5,6 +5,7 @@ import (
 	"e-commerce/internal/cart_items/service"
 	handler "e-commerce/pkg/response"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,4 +32,21 @@ func (h *CartItemHandler) CreateCartItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"cartItem": cartItem})
+}
+
+func (h *CartItemHandler) GetAllCartItems(c *gin.Context) {
+	idInput := c.Param("id")
+	id, err := strconv.Atoi(idInput)
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	items, err := h.service.GetAll(id)
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"cartItems": items})
 }
