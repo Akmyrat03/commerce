@@ -148,3 +148,56 @@ func (h *ProductHandler) GetProductByCategoryName(c *gin.Context) {
 		"products": products,
 	})
 }
+
+func (h *ProductHandler) LikeProduct(c *gin.Context) {
+	var req model.LikedProduct
+	if err := c.BindJSON(&req); err != nil {
+		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.service.LikeProduct(req.UserID, req.ProductID); err != nil {
+		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to like product")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Product liked successfully",
+	})
+}
+
+func (h *ProductHandler) UnlikeProduct(c *gin.Context) {
+	var req model.LikedProduct
+	if err := c.BindJSON(&req); err != nil {
+		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := h.service.UnlikeProduct(req.UserID, req.ProductID); err != nil {
+		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Product unliked successfully",
+	})
+}
+
+func (h *ProductHandler) GetLikedProducts(c *gin.Context) {
+	input := c.Query("user_id")
+	userID, err := strconv.Atoi(input)
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	products, err := h.service.GetLikedProducts(userID)
+	if err != nil {
+		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to fetch liked products")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"like_products": products,
+	})
+}

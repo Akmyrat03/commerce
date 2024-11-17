@@ -11,6 +11,10 @@ const (
 	Products = "products"
 )
 
+const (
+	LikedProducts = "liked_products"
+)
+
 type ProductRepository struct {
 	db *sqlx.DB
 }
@@ -93,4 +97,34 @@ func (r *ProductRepository) GetProductByID(id int) (model.Product, error) {
 	}
 
 	return product, nil
+}
+
+func (r *ProductRepository) LikeProduct(userID, productID int) error {
+	query := fmt.Sprintf("INSERT INTO %s (user_id, product_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", LikedProducts)
+	_, err := r.db.Exec(query, userID, productID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ProductRepository) UnlikeProduct(userID, productID int) error {
+	query := fmt.Sprintf("DELETE FROM %v WHERE user_id = $1 AND product_id = $2", LikedProducts)
+	_, err := r.db.Exec(query, userID, productID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *ProductRepository) GetLikedProducts(userID int) ([]model.LikedProduct, error) {
+	var likedProducts []model.LikedProduct
+	query := fmt.Sprintf("SELECT id, user_id, product_id FROM %s WHERE user_id = $1", LikedProducts)
+	err := r.db.Select(&likedProducts, query, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return likedProducts, nil
 }

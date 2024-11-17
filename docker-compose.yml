@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # This tells Docker Compose to use the Dockerfile you created
+    ports:
+      - "8080:8080"  # Expose the app on port 8080
+    environment:
+      - DB_HOST=db  # Reference to PostgreSQL service (will be used by your app)
+      - DB_PORT=5432
+      - DB_USER=postgres  # Set your database user here
+      - DB_PASSWORD=postgres  # Set your database password here
+      - DB_NAME=commerce  # Set your database name here
+    depends_on:
+      - db  # Ensure the app only starts after the database is ready
+
+  db:
+    image: postgres:15  # Use the official PostgreSQL image
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres  # Same user as above
+      POSTGRES_PASSWORD: postgres  # Same password as above
+      POSTGRES_DB: commerce  # Same database name as above
+    ports:
+      - "5432:5432"  # Expose the PostgreSQL service on port 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist data across container restarts
+
+volumes:
+  postgres_data:

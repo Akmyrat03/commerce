@@ -21,4 +21,8 @@ func InitRoutes(db *sqlx.DB, router *gin.RouterGroup) {
 	prodRoutes.GET("/view-all", prodHandler.GetAllProducts)
 	prodRoutes.GET("/published", prodHandler.GetAllPublishedProducts)
 	prodRoutes.GET("/view/:name", prodHandler.GetProductByCategoryName)
+
+	prodRoutes.POST("/like", prodHandler.LikeProduct)
+	prodRoutes.DELETE("/unlike", prodHandler.UnlikeProduct)
+	prodRoutes.GET("/liked-products", prodHandler.GetLikedProducts)
 }

@@ -36,3 +36,15 @@ func (s *ProductService) GetProductByCatName(category string) ([]model.Product, 
 func (s *ProductService) GetProductByID(id int) (model.Product, error) {
 	return s.repo.GetProductByID(id)
 }
+
+func (s *ProductService) LikeProduct(userID, productID int) error {
+	return s.repo.LikeProduct(userID, productID)
+}
+
+func (s *ProductService) UnlikeProduct(userID, productID int) error {
+	return s.repo.UnlikeProduct(userID, productID)
+}
+
+func (s *ProductService) GetLikedProducts(userID int) ([]model.LikedProduct, error) {
+	return s.repo.GetLikedProducts(userID)
+}

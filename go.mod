@@ -1,6 +1,6 @@
 module e-commerce
 
-go 1.23.1
+go 1.23
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
