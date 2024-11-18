@@ -6,6 +6,7 @@ import (
 	"e-commerce/internal/users/repository"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -107,4 +108,31 @@ func (s *UserService) ValidateToken(tokenString string) (string, error) {
 	}
 
 	return claims.Username, nil
+}
+
+func ValidatePhoneNumber(phone string) string {
+	if len(phone) != 8 {
+		return "Invalid phone number: must be exactly 8 digits long."
+	}
+
+	allowedPrefixes := []string{"61", "62", "63", "64", "65", "71"}
+	isValidPrefix := false
+	for _, prefix := range allowedPrefixes {
+		if strings.HasPrefix(phone, prefix) {
+			isValidPrefix = true
+			break
+		}
+	}
+
+	if !isValidPrefix {
+		return "Invalid phone number: must start with 61, 62, 63, 64, 65, or 71."
+	}
+
+	for _, char := range phone {
+		if char < '0' || char > '9' {
+			return "Invalid phone number: must contain only digits."
+		}
+	}
+
+	return "Valid phone number."
 }

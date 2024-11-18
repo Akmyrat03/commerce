@@ -40,8 +40,15 @@ func (m *UserMiddleware) SignUp() gin.HandlerFunc {
 			return
 		}
 
-		if input.Username == "" || input.Email == "" || input.Password == "" {
+		if input.Username == "" || input.PhoneNumber == "" || input.Password == "" {
 			handler.NewErrorResponse(c, http.StatusBadRequest, "All fields are required")
+			c.Abort()
+			return
+		}
+
+		validationMessage := service.ValidatePhoneNumber(input.PhoneNumber)
+		if validationMessage != "Valid phone number." {
+			handler.NewErrorResponse(c, http.StatusBadRequest, validationMessage)
 			c.Abort()
 			return
 		}
@@ -62,11 +69,11 @@ func (m *UserMiddleware) SignUp() gin.HandlerFunc {
 			return
 		}
 
-		// Check for existing user by email
-		existingEmailUser, err := m.repo.GetUserByField("email", input.Email)
-		if err == nil && existingEmailUser.Email != "" {
+		// Check for existing user by phone number
+		existingNumberUser, err := m.repo.GetUserByField("phone_number", input.PhoneNumber)
+		if err == nil && existingNumberUser.PhoneNumber != "" {
 			c.JSON(http.StatusConflict, gin.H{
-				"error": "Email already exists",
+				"error": "Phone number already exists",
 			})
 			c.Abort()
 			return
@@ -211,8 +218,8 @@ func (m *UserMiddleware) Profile() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"username": user.Username,
-			"email":    user.Email,
+			"username":     user.Username,
+			"phone_number": user.PhoneNumber,
 		})
 	}
 }

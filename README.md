@@ -1,7 +1,7 @@
 Commerce backend API
 
 ------------------------------------------------------------------------------------
-1) User can sign-up. Every user have unique username, unique email, role default “user” and password. All fields are required. Password must be at least 4 character. After entering all data it hashes the password and save all data to database.
+1) User can sign-up. Every user have unique username, unique phone number, role default “user” and password. All fields are required. Password must be at least 4 character. After entering all data it hashes the password and save all data to database.
 http://localhost:8000/api/users/sign-up
 
 2) User can login. All fields are required. If user enters username and password correctly then user can login. If user has role “user” it will redirect to "http://localhost:8000/api/user/profile“.

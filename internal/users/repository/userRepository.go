@@ -24,8 +24,8 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 
 func (r *UserRepository) CreateUser(user *model.User) (int, error) {
 	var id int
-	query := fmt.Sprintf(`INSERT INTO %s (username, email, password) VALUES ($1, $2, $3) RETURNING id`, Users)
-	row := r.db.QueryRow(query, user.Username, user.Email, user.Password)
+	query := fmt.Sprintf(`INSERT INTO %s (username, phone_number, password) VALUES ($1, $2, $3) RETURNING id`, Users)
+	row := r.db.QueryRow(query, user.Username, user.PhoneNumber, user.Password)
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
@@ -34,7 +34,7 @@ func (r *UserRepository) CreateUser(user *model.User) (int, error) {
 }
 
 func (r *UserRepository) GetUser(username, password string) (model.User, error) {
-	query := fmt.Sprintf(`SELECT id, username, email, password, role FROM %v WHERE username= $1 AND password=$2`, Users)
+	query := fmt.Sprintf(`SELECT id, username, phone_number, password, role FROM %v WHERE username= $1 AND password=$2`, Users)
 
 	var user model.User
 	err := r.db.Get(&user, query, username, password)
@@ -46,11 +46,11 @@ func (r *UserRepository) GetUser(username, password string) (model.User, error) 
 }
 
 func (r *UserRepository) GetUserByField(field, value string) (model.User, error) {
-	if field != "username" && field != "email" {
+	if field != "username" && field != "phone_number" {
 		return model.User{}, fmt.Errorf("unsupported field: %s", field)
 	}
 
-	query := fmt.Sprintf("SELECT id, username, email, password FROM %v WHERE %s= $1", Users, field)
+	query := fmt.Sprintf("SELECT id, username, phone_number, password FROM %v WHERE %s= $1", Users, field)
 	var user model.User
 	err := r.db.Get(&user, query, value)
 	if err != nil {
@@ -67,7 +67,7 @@ func (r *UserRepository) DeleteUser(userID int) error {
 }
 
 func (r *UserRepository) GetAll() ([]model.User, error) {
-	query := fmt.Sprintf("SELECT id, username, email, password, role, created_at FROM %v", Users)
+	query := fmt.Sprintf("SELECT id, username, phone_number, password, role, created_at, updated_at FROM %v", Users)
 	var users []model.User
 	err := r.db.Select(&users, query)
 	if err != nil {
