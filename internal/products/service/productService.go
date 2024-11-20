@@ -13,7 +13,7 @@ func NewProductService(repo *repository.ProductRepository) *ProductService {
 	return &ProductService{repo: repo}
 }
 
-func (s *ProductService) AddProduct(product model.Product) error {
+func (s *ProductService) AddProduct(product model.Product) (int, error) {
 	return s.repo.CreateProduct(product)
 }
 

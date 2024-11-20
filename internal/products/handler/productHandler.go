@@ -4,7 +4,6 @@ import (
 	"e-commerce/internal/products/model"
 	"e-commerce/internal/products/service"
 	handler "e-commerce/pkg/response"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -22,29 +21,22 @@ func NewProductHandler(service *service.ProductService) *ProductHandler {
 }
 
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
-	name := c.PostForm("name")
-	description := c.PostForm("description")
+	var product model.Product
 
-	priceInput := c.PostForm("price")
-	price, err := strconv.ParseFloat(priceInput, 64)
+	product.Name = c.PostForm("name")
+	product.Description = c.PostForm("description")
+	product.Price, _ = strconv.ParseFloat(c.PostForm("price"), 64)
+	product.CategoryID, _ = strconv.Atoi(c.PostForm("category_id"))
+	product.Status = c.PostForm("status")
+
+	product.Images = []string{}
+	form, err := c.MultipartForm()
 	if err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, "Invalid price format")
+		handler.NewErrorResponse(c, http.StatusBadRequest, "Invalid form data")
 		return
 	}
 
-	catIdInput := c.PostForm("category_id")
-	catID, err := strconv.Atoi(catIdInput)
-	if err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-	}
-
-	status := c.PostForm("status")
-
-	file, err := c.FormFile("image")
-	if err != nil {
-		handler.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
+	files := form.File["images"]
 
 	uploadDir := "./uploads/products"
 
@@ -52,29 +44,26 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		os.Mkdir(uploadDir, 0755)
 	}
 
-	filePath := filepath.Join(uploadDir, file.Filename)
+	for _, file := range files {
 
-	if err := c.SaveUploadedFile(file, filePath); err != nil {
-		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
+		filePath := filepath.Join(uploadDir, file.Filename)
+		if err := c.SaveUploadedFile(file, filePath); err != nil {
+			handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to upload image")
+			return
+		}
+
+		product.Images = append(product.Images, filePath)
 	}
 
-	product := model.Product{
-		Name:        name,
-		Description: description,
-		Price:       price,
-		Image:       filePath,
-		Status:      status,
-		CategoryID:  catID,
-	}
-
-	if err := h.service.AddProduct(product); err != nil {
-		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	productID, err := h.service.AddProduct(product)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "Product created successfully",
+		"message":   "Product created successfully",
+		"productID": productID,
 	})
 }
 
@@ -86,25 +75,25 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	existingProduct, err := h.service.GetProductByID(id)
-	if err != nil {
-		handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
-		return
-	}
+	// existingProduct, err := h.service.GetProductByID(id)
+	// if err != nil {
+	// 	handler.NewErrorResponse(c, http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
 
-	fmt.Println("Image path before deletion:", existingProduct.Image)
+	// fmt.Println("Image path before deletion:", existingProduct.Image)
 
 	if err := h.service.DeleteProduct(id); err != nil {
 		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete product")
 		return
 	}
 
-	if existingProduct.Image != "" {
-		if err := os.Remove(existingProduct.Image); err != nil && !os.IsNotExist(err) {
-			handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete image file")
-			return
-		}
-	}
+	// if existingProduct.Image != "" {
+	// 	if err := os.Remove(existingProduct.Image); err != nil && !os.IsNotExist(err) {
+	// 		handler.NewErrorResponse(c, http.StatusInternalServerError, "Failed to delete image file")
+	// 		return
+	// 	}
+	// }
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Product deleted successfully",

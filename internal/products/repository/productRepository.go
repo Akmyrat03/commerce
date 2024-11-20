@@ -3,16 +3,15 @@ package repository
 import (
 	"e-commerce/internal/products/model"
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 )
 
 const (
-	Products = "products"
-)
-
-const (
+	Products      = "products"
 	LikedProducts = "liked_products"
+	ProductImages = "product_images"
 )
 
 type ProductRepository struct {
@@ -24,14 +23,46 @@ func NewProductRepository(db *sqlx.DB) *ProductRepository {
 }
 
 // Admin can create a new product
-func (r *ProductRepository) CreateProduct(product model.Product) error {
-	query := fmt.Sprintf("INSERT INTO %s (name, description, image, price, status, category_id) VALUES ($1, $2, $3, $4, $5, $6)", Products)
-	_, err := r.db.Exec(query, product.Name, product.Description, product.Image, product.Price, product.Status, product.CategoryID)
+func (r *ProductRepository) CreateProduct(product model.Product) (int, error) {
+
+	tx, err := r.db.Begin()
 	if err != nil {
-		return err
+		log.Println("Error starting transaction:", err)
+		return 0, err
 	}
 
-	return nil
+	var productID int
+	query := fmt.Sprintf("INSERT INTO %s (name, description, price, status, category_id) VALUES ($1, $2, $3, $4, $5) RETURNING id", Products)
+	log.Println("Executing product query:", query)
+	log.Println("Values:", product.Name, product.Description, product.Price, product.Status, product.CategoryID)
+
+	err = tx.QueryRow(query, product.Name, product.Description, product.Price, product.Status, product.CategoryID).Scan(&productID)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	log.Println("Generated Product ID:", productID)
+
+	imageQuery := fmt.Sprintf("INSERT INTO %v (product_id, image_url) VALUES ($1, $2)", ProductImages)
+	for _, image := range product.Images {
+		log.Println("Inserting image:", image)
+		_, err := tx.Exec(imageQuery, product.ID, image)
+		if err != nil {
+			log.Println("Error inserting image:", err)
+			tx.Rollback()
+			return 0, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Println("Error committing transaction:", err)
+		return 0, err
+	}
+
+	log.Println("Transaction committed successfully.")
+
+	return productID, nil
 }
 
 func (r *ProductRepository) Delete(id int) error {
